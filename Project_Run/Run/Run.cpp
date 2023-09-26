@@ -5,18 +5,12 @@ ReadMe
 외부로 유출은 하지 않기를 바랍니다.
 */
 
+#include "stdafx.h"
+#include "Timer.h"
+#include "Scene.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <sstream>
-#include <chrono>
-#include <thread>
-#include "OpenGL/glew.h"
-#include "OpenGL/freeglut.h"
-#include "OpenGL/glm/ext.hpp"
-
-#pragma comment(lib, "glew32.lib")
-#pragma comment(lib, "freeglut.lib")
 
 
 // 콜백함수
@@ -38,44 +32,16 @@ GLuint CreateShaderProgram(std::string vertexFile, std::string fragmentFile);
 GLuint CompileShader(std::string fileName, GLenum shaderType);
 GLuint InitBuffer();
 
-class Timer {
-	std::chrono::steady_clock::time_point last_time;		// 마지막으로 호출된 시간
-	std::chrono::nanoseconds accm_time;
-	int fps;
-	int frame;
-
-public:
-	Timer() : last_time{ std::chrono::steady_clock::now() }, accm_time{ std::chrono::seconds{ 0 } }, fps{ 0 }, frame{ 0 } {}
-
-	float Tick(int fps_value)								// 경과 시간 리턴, 1 Frame에 단 한번 호출되어야 함
-	{
-		if (fps_value > 0 and accm_time.count() / 1'000'000'000. * fps_value < frame)		// 프레임 제한
-			std::this_thread::sleep_until(last_time + std::chrono::nanoseconds{ static_cast<int>(1. / fps_value * 1'000'000'000.) });
-
-		++frame;
-		auto now_time = std::chrono::steady_clock::now();
-		auto elapsed_time = now_time - last_time;
-		accm_time += elapsed_time;
-		last_time = now_time;
-		if (accm_time >= std::chrono::seconds{ 1 }) {			// 초당 한번씩 FPS 표시
-			float over_time = accm_time.count() / 1'000'000'000.;
-			fps = static_cast<int>(round(frame * (1.f / over_time)));
-			frame -= fps;
-			accm_time -= std::chrono::seconds{ 1 };
-
-			std::stringstream title;
-			title << "Run - (" << fps << "FPS)";
-			glutSetWindowTitle(title.str().c_str());
-		}
-
-		return elapsed_time.count() / 1'000'000'000.;		// 나노초를 초로 바꿔준다.
-	}
-};
 
 // --- 전역 변수
-Timer g_gameTimer;
+int winWidth = 800;
+int winHeight = 800;
+
+CTimer g_gameTimer;
 GLuint g_shader;
 GLuint g_VAO;
+
+CScene* g_pscene = nullptr;
 
 void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정 
 {
@@ -83,7 +49,7 @@ void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정
 	glutInit(&argc, argv);										// glut 초기화
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);	// 디스플레이 모드 설정
 	glutInitWindowPosition(100, 100);							// 윈도우의 위치 지정
-	glutInitWindowSize(800, 800);								// 윈도우의 크기 지정
+	glutInitWindowSize(winWidth, winHeight);								// 윈도우의 크기 지정
 	glutCreateWindow("Run");									// 윈도우 생성(윈도우 이름)
 
 	//--- GLEW 초기화하기
@@ -102,6 +68,8 @@ void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정
 	else {
 		std::cout << "GLEW 3.0 not supported\n";
 	}
+
+	g_pscene = new CScene{ winWidth, winHeight };
 
 	//	콜백함수 설정
 	glutDisplayFunc(Display);									// 출력 함수의 지정
@@ -165,11 +133,16 @@ GLvoid Display(GLvoid)
 
 GLvoid Reshape(int w, int h)
 {
+	winWidth = w;
+	winHeight = h;
 	glViewport(0, 0, w, h);
 }
 
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
+	if (g_pscene)
+		g_pscene->KeyboardEvent(GLUT_DOWN, key);
+
 	switch (key) {
 	case 'a':
 		break;
@@ -182,6 +155,9 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 
 GLvoid KeyboardUp(unsigned char key, int x, int y)
 {
+	if (g_pscene)
+		g_pscene->KeyboardEvent(GLUT_UP, key);
+
 	switch (key) {
 	case 'a':
 		break;
@@ -192,6 +168,9 @@ GLvoid KeyboardUp(unsigned char key, int x, int y)
 
 GLvoid SpecialKeyboard(int key, int x, int y)
 {
+	if (g_pscene)
+		g_pscene->SpecialKeyEvent(GLUT_UP, key);
+
 	switch (key) {
 	case GLUT_KEY_F9:
 		break;
@@ -200,6 +179,9 @@ GLvoid SpecialKeyboard(int key, int x, int y)
 
 GLvoid SpecialKeyboardUp(int key, int x, int y)
 {
+	if (g_pscene)
+		g_pscene->SpecialKeyEvent(GLUT_DOWN, key);
+
 	switch (key) {
 	case GLUT_KEY_F9:
 		glutFullScreenToggle();
@@ -209,6 +191,9 @@ GLvoid SpecialKeyboardUp(int key, int x, int y)
 
 GLvoid Mouse(int button, int state, int x, int y)
 {
+	if (g_pscene)
+		g_pscene->MouseEvent(button, state, x, y);
+
 	static const int WHEEL_UP = 3, WHEEL_DOWN = 4;
 	switch (state) {
 	case GLUT_DOWN:
