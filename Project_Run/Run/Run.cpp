@@ -1,8 +1,6 @@
 /*
 ReadMe
-해당 코드는 Kyu's Study 에서 작성된 코드이며
-언제든지 사용 및 수정할 수 있지만
-외부로 유출은 하지 않기를 바랍니다.
+Run 게임 모작
 */
 
 #include "stdafx.h"
@@ -23,12 +21,6 @@ GLvoid Motion(int x, int y);
 GLvoid PassiveMotion(int x, int y);
 GLvoid IdleScene(GLvoid);
 GLvoid TimerFunction(int value);
-
-// 셰이더 관련 함수들
-std::string ReadFile(std::string fileName);
-GLuint CreateShaderProgram(std::string vertexFile, std::string fragmentFile);
-GLuint CompileShader(std::string fileName, GLenum shaderType);
-GLuint InitBuffer();
 
 
 // --- 전역 변수
