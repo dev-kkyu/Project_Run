@@ -1,9 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include <sstream>
 #include <chrono>
-#include <thread>
 
 class CTimer {
 	std::chrono::steady_clock::time_point last_time;		// 마지막으로 호출된 시간
