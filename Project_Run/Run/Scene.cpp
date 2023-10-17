@@ -51,6 +51,27 @@ void CScene::Release()
 
 void CScene::MouseEvent(int button, int state, int x, int y)
 {
+	static const int WHEEL_UP = 3, WHEEL_DOWN = 4;
+	switch (state) {
+	case GLUT_DOWN:
+		switch (button) {
+		case GLUT_LEFT_BUTTON:
+			break;
+		case GLUT_RIGHT_BUTTON:
+			break;
+		case GLUT_MIDDLE_BUTTON:
+			break;
+		case WHEEL_DOWN:
+			break;
+		case WHEEL_UP:
+			break;
+		}
+		break;
+	case GLUT_UP:
+		break;
+	default:
+		break;
+	}
 }
 
 void CScene::KeyboardEvent(int state, unsigned char key)

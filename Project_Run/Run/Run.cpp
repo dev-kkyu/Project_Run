@@ -57,6 +57,7 @@ void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정
 		std::cout << "GLEW 3.0 not supported\n";
 	}
 
+	// 씬을 생성한다.
 	g_pscene = new CScene{ winWidth, winHeight };
 
 	//	콜백함수 설정
@@ -118,8 +119,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		g_pscene->KeyboardEvent(GLUT_DOWN, key);
 
 	switch (key) {
-	case 'a':
-		break;
 	case 27:			// ESC Key
 		glutLeaveMainLoop();
 	default:
@@ -131,24 +130,12 @@ GLvoid KeyboardUp(unsigned char key, int x, int y)
 {
 	if (g_pscene)
 		g_pscene->KeyboardEvent(GLUT_UP, key);
-
-	switch (key) {
-	case 'a':
-		break;
-	default:
-		break;
-	}
 }
 
 GLvoid SpecialKeyboard(int key, int x, int y)
 {
 	if (g_pscene)
 		g_pscene->SpecialKeyEvent(GLUT_DOWN, key);
-
-	switch (key) {
-	case GLUT_KEY_F9:
-		break;
-	}
 }
 
 GLvoid SpecialKeyboardUp(int key, int x, int y)
@@ -157,7 +144,7 @@ GLvoid SpecialKeyboardUp(int key, int x, int y)
 		g_pscene->SpecialKeyEvent(GLUT_UP, key);
 
 	switch (key) {
-	case GLUT_KEY_F9:
+	case GLUT_KEY_F9:			// F9 누르면 전체화면
 		glutFullScreenToggle();
 		break;
 	}
@@ -167,40 +154,6 @@ GLvoid Mouse(int button, int state, int x, int y)
 {
 	if (g_pscene)
 		g_pscene->MouseEvent(button, state, x, y);
-
-	static const int WHEEL_UP = 3, WHEEL_DOWN = 4;
-	switch (state) {
-	case GLUT_DOWN:
-		switch (button) {
-		case GLUT_LEFT_BUTTON:
-			break;
-		case GLUT_RIGHT_BUTTON:
-			break;
-		case GLUT_MIDDLE_BUTTON:
-			break;
-		case WHEEL_DOWN:
-			break;
-		case WHEEL_UP:
-			break;
-		}
-		break;
-	case GLUT_UP:
-		switch (button) {
-		case GLUT_LEFT_BUTTON:
-			break;
-		case GLUT_RIGHT_BUTTON:
-			break;
-		case GLUT_MIDDLE_BUTTON:
-			break;
-		case WHEEL_DOWN:
-			break;
-		case WHEEL_UP:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 GLvoid Motion(int x, int y)
@@ -215,7 +168,7 @@ GLvoid PassiveMotion(int x, int y)
 
 GLvoid IdleScene(GLvoid)
 {
-	float elapsedTime = g_gameTimer.Tick(0);					// 지난 시간 얻기 및 타이머 작동 (value를 0으로 넣으면 프레임제한 X)
+	float elapsedTime = g_gameTimer.Tick(0);	// 지난 시간 얻기 및 타이머 작동 (value를 0으로 넣으면 프레임제한 X)
 
 	if (g_pscene)
 		g_pscene->Update(elapsedTime);
