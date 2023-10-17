@@ -1,6 +1,7 @@
 #include "Map.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 CMap::CMap(std::string filename)
 {
@@ -8,11 +9,13 @@ CMap::CMap(std::string filename)
 	if (!in) {
 		std::cerr << filename << " 열기 실패" << std::endl;
 	}
-	while (in) {
+	std::string str;
+	while (std::getline(in, str)) {
+		std::stringstream ss{ str };
 		glm::imat4 mati;
 		for (int i = 0; i < 4; ++i) {
 			glm::ivec4 line;
-			in >> line[0] >> line[1] >> line[2] >> line[3];
+			ss >> line[0] >> line[1] >> line[2] >> line[3];
 			mati[i] = line;
 		}
 		map_data.push_back(mati);
@@ -27,6 +30,12 @@ CMap::~CMap()
 
 void CMap::Initialize()
 {
+	for (const auto& a : map_data) {
+		for (int i = 0; i < 4; ++i)
+			std::cout << a[i].x << " " << a[i].y << " " << a[i].z << " " << a[i].w << "  ";
+		std::cout << std::endl;
+	}
+	std::cout << map_data.size() << "개" << std::endl;
 }
 
 void CMap::Update(float ElapsedTime)

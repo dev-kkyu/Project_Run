@@ -14,7 +14,7 @@ CScene::~CScene()
 
 void CScene::Initialize()
 {
-	m_map = std::make_unique<CMap>("filename");
+	m_map = std::make_unique<CMap>("./Map/map1.txt");
 
 }
 
