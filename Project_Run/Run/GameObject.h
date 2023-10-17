@@ -7,6 +7,8 @@ protected:
 	GLuint m_shader;
 	GLuint m_vao;
 
+	bool isInitialized;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();

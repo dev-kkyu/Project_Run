@@ -12,6 +12,7 @@ CGameObject::~CGameObject()
 
 void CGameObject::Initialize()
 {
+	isInitialized = false;
 }
 
 void CGameObject::Update(float ElapsedTime)
@@ -38,4 +39,5 @@ void CGameObject::SetShader(GLuint shader)
 void CGameObject::SetVao(GLuint vao)
 {
 	m_vao = vao;
+	isInitialized = true;
 }

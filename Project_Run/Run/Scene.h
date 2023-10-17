@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 
 class CMap;
 class CScene
@@ -23,7 +24,5 @@ public:
 	void MouseEvent(int button, int state, int x, int y);
 	void KeyboardEvent(int state, unsigned char key);
 	void SpecialKeyEvent(int state, int key);
-
-	GLuint InitBuffer();
 };
 

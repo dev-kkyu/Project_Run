@@ -1,13 +1,14 @@
 #pragma once
 #include "GameObject.h"
+#include <vector>
 
 class CMap : public CGameObject
 {
 private:
-
+	std::vector<glm::imat4> map_data;
 
 public:
-	CMap();
+	CMap(std::string filename);
 	virtual ~CMap();
 
 	virtual void Initialize() override;					//생성될 때 할 일
