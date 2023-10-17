@@ -13,7 +13,13 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Shader">
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{626afc57-14d8-48b7-bac7-0b2bbbef9974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Map">
+      <UniqueIdentifier>{bc5ff8ac-5572-47c5-8ce6-8d0468e70a53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
       <UniqueIdentifier>{0ebeeaee-4fda-44bd-9769-2b8519537488}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -30,13 +36,19 @@
     <ClCompile Include="Timer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>GameObject\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl">
-      <Filter>소스 파일\Shader</Filter>
+      <Filter>Shader</Filter>
     </None>
     <None Include="Shader\vertex.glsl">
-      <Filter>소스 파일\Shader</Filter>
+      <Filter>Shader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +60,12 @@
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>GameObject\Map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

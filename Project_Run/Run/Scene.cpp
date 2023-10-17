@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "Scene.h"
+#include "Map.h"
 #include <iostream>
 
 CScene::CScene(int& width, int& height) : w_width{ width }, w_height{ height }
@@ -14,19 +14,15 @@ CScene::~CScene()
 
 void CScene::Initialize()
 {
-	angle = 0.f;
-
-	m_shader = CreateShaderProgram("./Shader/vertex.glsl", "./Shader/fragment.glsl");	// 셰이더 프로그램 생성
-	m_vao = InitBuffer();
+	m_map = std::make_unique<CMap>();
 
 }
 
 void CScene::Update(float ElapsedTime)
 {
-	float changeangle = 90.f * ElapsedTime;						// 초당 90도 회전
-	angle += changeangle;
-	if (angle > 360.f)
-		angle -= 360.f;
+	if (m_map) {
+		m_map->Update(ElapsedTime);
+	}
 }
 
 void CScene::FixedUpdate()
@@ -35,14 +31,9 @@ void CScene::FixedUpdate()
 
 void CScene::Render()
 {
-	glUseProgram(m_shader);
-
-	glm::mat4 trans = glm::rotate(glm::mat4(1.f), glm::radians(angle), glm::vec3(0.f, 1.f, 0.f));
-	GLint worldLoc = glGetUniformLocation(m_shader, "world");
-	glUniformMatrix4fv(worldLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-	glBindVertexArray(m_vao);
-	glDrawArrays(GL_TRIANGLES, 0, 36);	// 삼각형을 그린다. 0번 인덱스부터 3개의 점
+	if (m_map) {
+		m_map->Render();
+	}
 }
 
 void CScene::Release()

@@ -1,13 +1,14 @@
 #pragma once
+#include "stdafx.h"
+
+class CMap;
 class CScene
 {
 private:
 	int& w_width;
 	int& w_height;
 
-	float angle;
-	GLuint m_shader;
-	GLuint m_vao;
+	std::unique_ptr<CMap> m_map;
 
 public:
 	CScene(int& width, int& height);
