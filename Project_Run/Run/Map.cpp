@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-CMap::CMap(std::string filename)
+CMap::CMap(std::string filename, int& winWidth, int& winHeight) : w_width{ winWidth }, w_height{ winHeight }
 {
 	std::ifstream in{ filename };
 	if (!in) {
@@ -20,6 +20,9 @@ CMap::CMap(std::string filename)
 		}
 		map_data.push_back(mati);
 	}
+	if (not map_data.empty()) {
+		std::cout << filename << " 맵 로드 완료" << std::endl;
+	}
 
 	Initialize();
 }
@@ -30,18 +33,39 @@ CMap::~CMap()
 
 void CMap::Initialize()
 {
-	for (const auto& a : map_data) {
-		for (int i = 0; i < 4; ++i)
-			std::cout << a[i].x << " " << a[i].y << " " << a[i].z << " " << a[i].w << "  ";
-		std::cout << std::endl;
+	//for (const auto& a : map_data) {
+	//	for (int i = 0; i < 4; ++i)
+	//		std::cout << a[i].x << " " << a[i].y << " " << a[i].z << " " << a[i].w << "  ";
+	//	std::cout << std::endl;
+	//}
+	//std::cout << map_data.size() << "개" << std::endl;
+
+	// 그냥 한 면 단위로 그리자. 한 면을 알파값 바꿔가면서, 투명하게 그릴곳 선택하고, 다음 인덱스는 translate로 밀어서 그리고.. 대충 10개정도.
+
+	GLuint shader = CreateShaderProgram("./Shader/MapShader.vert", "./Shader/MapShader.frag");
+	SetShader(shader);
+
+	GLuint vao = InitBuffer();
+	SetVao(vao);
+
+	glm::mat4 camera = glm::lookAt(glm::vec3(0.0f, 0.5f, 5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
+	if (cameraLoc < 0) {
+		std::cerr << "cameraLoc 찾지 못함" << std::endl;
 	}
-	std::cout << map_data.size() << "개" << std::endl;
+	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
+
 }
 
 void CMap::Update(float ElapsedTime)
 {
 	if (isInitialized) {
-
+		glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)w_width / (float)w_height, 0.1f, 100.f);
+		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
+		if (projLoc < 0) {
+			std::cerr << "projLoc 찾지 못함" << std::endl;
+		}
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	}
 }
 
@@ -55,10 +79,138 @@ void CMap::Render()
 		glUseProgram(m_shader);
 		glBindVertexArray(m_vao);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		GLint modelLoc = glGetUniformLocation(m_shader, "modelMat");
+		if (modelLoc < 0) {
+			std::cerr << "modelLoc 찾지 못함" << std::endl;
+		}
+		GLint idxLoc = glGetUniformLocation(m_shader, "idx");
+		if (idxLoc < 0) {
+			std::cerr << "idxLoc 찾지 못함" << std::endl;
+		}
+
+		constexpr int MAX_Layer = 10;
+
+		for (int i = 0; i < MAX_Layer; ++i) {
+			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -2.f * i));
+			glUniform1f(idxLoc, (float)i);
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_QUADS, 0, 64);
+		}
 	}
 }
 
 void CMap::Release()
 {
+}
+
+GLuint CMap::InitBuffer()
+{
+	GLuint VAO, VBO;					// 정점 데이터를 GPU에 넘겨줄 VAO, VBO 생성
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);	// VBO를 정점버퍼로 설정 및 바인딩
+
+	// y -2.f ~ 2.f
+	// x -2.f ~ 2.f
+	// z -0.5f, 0.5f
+	float vertexRects[]{	// 위 왼 아 오	// 반시계
+		// 위쪽 네개 사각형
+		-2.f, 2.f, 1.f,
+		-2.f, 2.f, -1.f,
+		-1.f, 2.f, -1.f,
+		-1.f, 2.f, 1.f,
+
+		-1.f, 2.f, 1.f,
+		-1.f, 2.f, -1.f,
+		0.f, 2.f, -1.f,
+		0.f, 2.f, 1.f,
+
+		0.f, 2.f, 1.f,
+		0.f, 2.f, -1.f,
+		1.f, 2.f, -1.f,
+		1.f, 2.f, 1.f,
+
+		1.f, 2.f, 1.f,
+		1.f, 2.f, -1.f,
+		2.f, 2.f, -1.f,
+		2.f, 2.f, 1.f,
+
+		// 왼쪽 네개 사각형
+		-2.f, 2.f, 1.f,
+		-2.f, 1.f, 1.f,
+		-2.f, 1.f, -1.f,
+		-2.f, 2.f, -1.f,
+
+		-2.f, 1.f, 1.f,
+		-2.f, 0.f, 1.f,
+		-2.f, 0.f, -1.f,
+		-2.f, 1.f, -1.f,
+
+		-2.f, 0.f, 1.f,
+		-2.f, -1.f, 1.f,
+		-2.f, -1.f, -1.f,
+		-2.f, 0.f, -1.f,
+
+		-2.f, -1.f, 1.f,
+		-2.f, -2.f, 1.f,
+		-2.f, -2.f, -1.f,
+		-2.f, -1.f, -1.f,
+
+		// 아래쪽 네개 사각형
+		-2.f, -2.f, -1.f,
+		-2.f, -2.f, 1.f,
+		-1.f, -2.f, 1.f,
+		-1.f, -2.f, -1.f,
+
+		-1.f, -2.f, -1.f,
+		-1.f, -2.f, 1.f,
+		0.f, -2.f, 1.f,
+		0.f, -2.f, -1.f,
+
+		0.f, -2.f, -1.f,
+		0.f, -2.f, 1.f,
+		1.f, -2.f, 1.f,
+		1.f, -2.f, -1.f,
+
+		1.f, -2.f, -1.f,
+		1.f, -2.f, 1.f,
+		2.f, -2.f, 1.f,
+		2.f, -2.f, -1.f,
+
+		// 오른쪽 네개 사각형
+		2.f, 2.f, -1.f,
+		2.f, 1.f, -1.f,
+		2.f, 1.f, 1.f,
+		2.f, 2.f, 1.f,
+
+		2.f, 1.f, -1.f,
+		2.f, 0.f, -1.f,
+		2.f, 0.f, 1.f,
+		2.f, 1.f, 1.f,
+
+		2.f, 0.f, -1.f,
+		2.f, -1.f, -1.f,
+		2.f, -1.f, 1.f,
+		2.f, 0.f, 1.f,
+
+		2.f, -1.f, -1.f,
+		2.f, -2.f, -1.f,
+		2.f, -2.f, 1.f,
+		2.f, -1.f, 1.f
+
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, 192 * sizeof(float), vertexRects, GL_STATIC_DRAW);	// VBO(GPU)로 정점 데이터 복사
+
+	GLint AttribPosLoc = glGetAttribLocation(m_shader, "vPos");						// 셰이더에서 vPos의 위치 가져온다.
+	if (AttribPosLoc < 0) {
+		std::cerr << "AttribLoc 찾기 실패" << std::endl;
+	}
+	glVertexAttribPointer(AttribPosLoc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<void*>(0));	// 현재 VBO에 있는 데이터 속성 정의
+	// glVertexAttribPointer(attrib 위치, vertex 몇개씩 읽을건지, gl_float, gl_false, stride(간격), 시작 위치(포인터));
+	glEnableVertexAttribArray(AttribPosLoc);										// Attribute 활성화
+
+	return VAO;
 }
