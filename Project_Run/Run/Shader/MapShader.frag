@@ -3,12 +3,13 @@
 out vec4 FragColor;
 
 in float zVal;
+in float alpha_val;
 
-uniform float Index;
+uniform float Index;		// 0~29 값이 넘어옴. 색상 변화를 위해 넘겨줌(깊이)
 
 void main()
 {
-	vec4 newColor = vec4(0.f, 0.f, 0.f, 1.0);
+	vec4 newColor = vec4(0.f, 0.f, 0.f, alpha_val);
 
 	float idx = Index - zVal;
 	if (idx < 15) {

@@ -12,9 +12,9 @@ CMap::CMap(std::string filename, int& winWidth, int& winHeight) : w_width{ winWi
 	std::string str;
 	while (std::getline(in, str)) {
 		std::stringstream ss{ str };
-		glm::imat4 mati;
+		glm::mat4 mati;
 		for (int i = 0; i < 4; ++i) {
-			glm::ivec4 line;
+			glm::vec4 line;
 			ss >> line[0] >> line[1] >> line[2] >> line[3];
 			mati[i] = line;
 		}
@@ -59,7 +59,7 @@ void CMap::Initialize()
 	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
 	move_z = 0.f;
-
+	map_index = -10;
 }
 
 void CMap::Update(float ElapsedTime)
@@ -77,8 +77,10 @@ void CMap::Update(float ElapsedTime)
 	}
 
 	move_z += 3.5f * ElapsedTime;
-	if (move_z > 1.f)
+	if (move_z > 1.f) {
 		move_z -= 1.f;
+		++map_index;
+	}
 }
 
 void CMap::FixedUpdate()
@@ -104,16 +106,35 @@ void CMap::Render()
 		if (zLoc < 0) {
 			std::cerr << "zLoc 찾지 못함" << std::endl;
 		}
+		GLint alphaLoc = glGetUniformLocation(m_shader, "alpha_mat");
+		if (alphaLoc < 0) {
+			std::cerr << "alphaLoc 찾지 못함" << std::endl;
+		}
 
 		glUniform1f(zLoc, move_z);
 
 		constexpr int MAX_Layer = 30;
 		for (int i = 0; i < MAX_Layer; ++i) {
+			glm::mat4 alpha(0.f);
+			int index = map_index + i;
+			if (index >= 0 and index < 100) {
+				alpha = map_data[index];
+			}
+			else {
+				for (int a = 0; a < 4; ++a) {
+					for (int b = 0; b < 4; ++b) {
+						alpha[a][b] = 1.f;
+					}
+				}
+			}
+			glUniformMatrix4fv(alphaLoc, 1, GL_FALSE, glm::value_ptr(alpha));
+
 			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -1.f * i));
 			glUniform1f(idxLoc, (float)i);
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_QUADS, 0, 64);
 		}
+
 	}
 }
 
@@ -135,25 +156,25 @@ GLuint CMap::InitBuffer()
 	float zSize = 0.5f;
 	float vertexRects[]{	// 위 왼 아 오	// 반시계
 		// 위쪽 네개 사각형
-		-2.f, 2.f, zSize,
-		-2.f, 2.f, -zSize,
-		-1.f, 2.f, -zSize,
-		-1.f, 2.f, zSize,
-
-		-1.f, 2.f, zSize,
-		-1.f, 2.f, -zSize,
-		0.f, 2.f, -zSize,
-		0.f, 2.f, zSize,
-
-		0.f, 2.f, zSize,
-		0.f, 2.f, -zSize,
-		1.f, 2.f, -zSize,
-		1.f, 2.f, zSize,
-
 		1.f, 2.f, zSize,
 		1.f, 2.f, -zSize,
 		2.f, 2.f, -zSize,
 		2.f, 2.f, zSize,
+
+		0.f, 2.f, zSize,
+		0.f, 2.f, -zSize,
+		1.f, 2.f, -zSize,
+		1.f, 2.f, zSize,
+
+		-1.f, 2.f, zSize,
+		-1.f, 2.f, -zSize,
+		0.f, 2.f, -zSize,
+		0.f, 2.f, zSize,
+
+		-2.f, 2.f, zSize,
+		-2.f, 2.f, -zSize,
+		-1.f, 2.f, -zSize,
+		-1.f, 2.f, zSize,
 
 		// 왼쪽 네개 사각형
 		-2.f, 2.f, zSize,
@@ -198,25 +219,25 @@ GLuint CMap::InitBuffer()
 		2.f, -2.f, -zSize,
 
 		// 오른쪽 네개 사각형
-		2.f, 2.f, -zSize,
-		2.f, 1.f, -zSize,
-		2.f, 1.f, zSize,
-		2.f, 2.f, zSize,
-
-		2.f, 1.f, -zSize,
-		2.f, 0.f, -zSize,
-		2.f, 0.f, zSize,
-		2.f, 1.f, zSize,
+		2.f, -1.f, -zSize,
+		2.f, -2.f, -zSize,
+		2.f, -2.f, zSize,
+		2.f, -1.f, zSize,
 
 		2.f, 0.f, -zSize,
 		2.f, -1.f, -zSize,
 		2.f, -1.f, zSize,
 		2.f, 0.f, zSize,
 
-		2.f, -1.f, -zSize,
-		2.f, -2.f, -zSize,
-		2.f, -2.f, zSize,
-		2.f, -1.f, zSize
+		2.f, 1.f, -zSize,
+		2.f, 0.f, -zSize,
+		2.f, 0.f, zSize,
+		2.f, 1.f, zSize,
+
+		2.f, 2.f, -zSize,
+		2.f, 1.f, -zSize,
+		2.f, 1.f, zSize,
+		2.f, 2.f, zSize
 
 	};
 

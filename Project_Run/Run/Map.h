@@ -7,9 +7,10 @@ class CMap : public CGameObject
 private:
 	int& w_width;
 	int& w_height;
-	std::vector<glm::imat4> map_data;
+	std::vector<glm::mat4> map_data;
 
 	float move_z;
+	int map_index;
 
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);

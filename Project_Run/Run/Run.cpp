@@ -95,7 +95,7 @@ void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정
 
 GLvoid Display(GLvoid)
 {
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);						// 바탕색 지정
+	glClearColor(0.f, 0.f, 0.f, 1.0f);						// 바탕색 지정
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);			// 설정된 색으로 전체를 칠하기
 
 	// 그리기 부분 구현: 그리기 관련 부분이 여기에 포함된다.
