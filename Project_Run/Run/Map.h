@@ -34,5 +34,7 @@ public:
 
 	void KeyboardEvent(int state, unsigned char key);
 	void SpecialKeyEvent(int state, int key);
+
+	bool isOffTile();
 };
 

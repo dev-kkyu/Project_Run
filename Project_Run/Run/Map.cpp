@@ -68,7 +68,7 @@ void CMap::Update(float ElapsedTime)
 		move_z += 3.5f * ElapsedTime;
 		if (move_z > 1.f) {
 			move_z -= 1.f;
-			++map_index;
+			++map_index;		// map_index의 의미. 현재 0번위치의 사각형부터 map_data[map_index]의 지형을 본다.
 		}
 
 		if (isLeft or isRight) {
@@ -83,6 +83,9 @@ void CMap::Update(float ElapsedTime)
 		if (projLoc < 0) {
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
+
+		if (isOffTile())
+			std::cout << "Off" << clock() << std::endl;
 
 		glm::vec3 eye(move_x, -0.9f, 0.9f);
 		glm::mat4 camera = glm::lookAt(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(eye.x, eye.y, -50.f), glm::vec3(0.f, 1.f, 0.f));
@@ -314,4 +317,24 @@ void CMap::SpecialKeyEvent(int state, int key)
 		}
 		break;
 	}
+}
+
+bool CMap::isOffTile()
+{
+	int bottom = 2;
+
+	int posIdx = round(move_x + 1.5f);
+	if (map_index >= -2 and map_index < 99) {
+		if (move_z <= 0.5f and map_index >= -1) {
+			int lineIdx = map_index + 1;
+			if (not map_data[lineIdx][bottom][posIdx])
+				return true;
+		}
+		else if (move_z > 0.5f and map_index < 98){
+			int lineIdx = map_index + 2;
+			if (not map_data[lineIdx][bottom][posIdx])
+				return true;
+		}
+	}
+	return false;
 }
