@@ -1,9 +1,8 @@
 #include "Player.h"
 #include <iostream>
 
-CPlayer::CPlayer(glm::mat4 cameraMat)
+CPlayer::CPlayer()
 {
-	SetCamera(cameraMat);
 	Initialize();
 }
 
@@ -33,10 +32,16 @@ void CPlayer::Update(float ElapsedTime)
 {
 	if (isInitialized) {
 		glUseProgram(m_shader);
+		GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
+		if (cameraLoc < 0) {
+			std::cerr << "cameraLoc 찾지 못함" << std::endl;
+		}
 		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
 		if (projLoc < 0) {
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
+
+		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projMat));
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(0.25f, 0.25f, 1.f));

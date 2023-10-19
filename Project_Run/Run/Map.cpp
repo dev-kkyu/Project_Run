@@ -50,23 +50,13 @@ void CMap::Initialize()
 	GLuint vao = InitBuffer();
 	SetVao(vao);
 
-	float eyeX = 0.f;
-	float eyeY = -0.9f;
-	float eyeZ = 0.9f;
-	glm::mat4 camera = glm::lookAt(glm::vec3(eyeX, eyeY, eyeZ), glm::vec3(eyeX, eyeY, -50.f), glm::vec3(0.f, 1.f, 0.f));
-	GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
-	if (cameraLoc < 0) {
-		std::cerr << "cameraLoc 찾지 못함" << std::endl;
-	}
-	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
-
 	move_z = 0.f;
 	map_index = -10;
 
 	isLeft = isRight = false;
 	move_x = 0.f;
 
-	m_pplayer = std::make_unique<CPlayer>(camera);
+	m_pplayer = std::make_unique<CPlayer>();
 }
 
 void CMap::Update(float ElapsedTime)
@@ -74,13 +64,6 @@ void CMap::Update(float ElapsedTime)
 	// 초당 5개
 	if (isInitialized) {
 		glUseProgram(m_shader);
-		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)w_width / (float)w_height, 0.1f, 100.f);
-		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
-		if (projLoc < 0) {
-			std::cerr << "projLoc 찾지 못함" << std::endl;
-		}
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 
 		move_z += 3.5f * ElapsedTime;
 		if (move_z > 1.f) {
@@ -89,14 +72,30 @@ void CMap::Update(float ElapsedTime)
 		}
 
 		if (isLeft or isRight) {
-			move_x += (-isLeft + isRight) * 1.5f * ElapsedTime;
-			if (m_pplayer)
-				m_pplayer->SetMoveX(move_x);
+			move_x += (-isLeft + isRight) * 3.f * ElapsedTime;
 		}
+
+		GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
+		if (cameraLoc < 0) {
+			std::cerr << "cameraLoc 찾지 못함" << std::endl;
+		}
+		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
+		if (projLoc < 0) {
+			std::cerr << "projLoc 찾지 못함" << std::endl;
+		}
+
+		glm::vec3 eye(move_x, -0.9f, 0.9f);
+		glm::mat4 camera = glm::lookAt(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(eye.x, eye.y, -50.f), glm::vec3(0.f, 1.f, 0.f));
+		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
+
+		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)w_width / (float)w_height, 0.1f, 100.f);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 
 		if (m_pplayer) {
+			m_pplayer->SetCamera(camera);
 			m_pplayer->SetProjection(projection);
+			m_pplayer->SetMoveX(move_x);
 			m_pplayer->Update(ElapsedTime);
 		}
 	}

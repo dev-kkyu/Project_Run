@@ -11,7 +11,7 @@ private:
 	float move_x;
 
 public:
-	CPlayer(glm::mat4 cameraMat);
+	CPlayer();
 	virtual ~CPlayer();
 
 	virtual void Initialize() override;					//생성될 때 할 일
