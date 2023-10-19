@@ -11,7 +11,7 @@ void main()
 	vec4 newColor = vec4(0.f, 0.f, 0.f, 1.0);
 
 	float idx = Index - zVal;
-	if (Index < 15) {
+	if (idx < 15) {
 		newColor.g = (19.f - idx + 1.f) / 20.f;
 		newColor.b = (19.f - idx + 1.f) / 20.f;
 	}
