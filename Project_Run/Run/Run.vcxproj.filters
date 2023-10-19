@@ -22,6 +22,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{0ebeeaee-4fda-44bd-9769-2b8519537488}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\Player">
+      <UniqueIdentifier>{831eefe4-7cd8-4746-985f-35fe5e28405d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Run.cpp">
@@ -42,18 +45,21 @@
     <ClCompile Include="Map.cpp">
       <Filter>GameObject\Map</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameObject\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\fragment.glsl">
-      <Filter>Shader</Filter>
-    </None>
-    <None Include="Shader\vertex.glsl">
-      <Filter>Shader</Filter>
-    </None>
     <None Include="Shader\MapShader.vert">
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\MapShader.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\PlayerShader.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\PlayerShader.frag">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
@@ -72,6 +78,9 @@
     </ClInclude>
     <ClInclude Include="Map.h">
       <Filter>GameObject\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>GameObject\Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

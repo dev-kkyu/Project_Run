@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Player.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -29,6 +30,7 @@ CMap::CMap(std::string filename, int& winWidth, int& winHeight) : w_width{ winWi
 
 CMap::~CMap()
 {
+	Release();
 }
 
 void CMap::Initialize()
@@ -60,12 +62,15 @@ void CMap::Initialize()
 
 	move_z = 0.f;
 	map_index = -10;
+
+	m_pplayer = std::make_unique<CPlayer>(camera);
 }
 
 void CMap::Update(float ElapsedTime)
 {
 	// 초당 5개
 	if (isInitialized) {
+		glUseProgram(m_shader);
 		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)w_width / (float)w_height, 0.1f, 100.f);
 		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
 		if (projLoc < 0) {
@@ -73,7 +78,10 @@ void CMap::Update(float ElapsedTime)
 		}
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		//move_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, move_z));
+		if (m_pplayer) {
+			m_pplayer->SetProjection(projection);
+			m_pplayer->Update(ElapsedTime);
+		}
 	}
 
 	move_z += 3.5f * ElapsedTime;
@@ -135,6 +143,8 @@ void CMap::Render()
 			glDrawArrays(GL_QUADS, 0, 64);
 		}
 
+		if (m_pplayer)
+			m_pplayer->Render();
 	}
 }
 
@@ -144,6 +154,7 @@ void CMap::Release()
 
 GLuint CMap::InitBuffer()
 {
+	glUseProgram(m_shader);
 	GLuint VAO, VBO;					// 정점 데이터를 GPU에 넘겨줄 VAO, VBO 생성
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);

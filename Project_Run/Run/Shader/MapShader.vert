@@ -16,7 +16,7 @@ int getquo(float a, float b) {
     return int(floor(float(a) / float(b)));
 }
 
-int getmod(float a, float b){
+int getrem(float a, float b){
 	return int(mod(int(a), int(b)));
 }
 
@@ -31,5 +31,5 @@ void main()
 	float val = gl_VertexID / 4.f;
 	val = floor(val);	// 0~15
 	
-	alpha_val = alpha_mat[getquo(val, 4)][getmod(val, 4)];
+	alpha_val = alpha_mat[getquo(val, 4)][getrem(val, 4)];
 }
