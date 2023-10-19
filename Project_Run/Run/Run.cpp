@@ -24,8 +24,8 @@ GLvoid TimerFunction(int value);
 
 
 // --- 전역 변수
-int winWidth = 800;
-int winHeight = 800;
+int winWidth = 1024;
+int winHeight = 768;
 
 CTimer g_gameTimer;
 

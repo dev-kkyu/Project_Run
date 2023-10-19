@@ -48,7 +48,10 @@ void CMap::Initialize()
 	GLuint vao = InitBuffer();
 	SetVao(vao);
 
-	glm::mat4 camera = glm::lookAt(glm::vec3(0.0f, 0.5f, 5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	float eyeX = 0.f;
+	float eyeY = -0.9f;
+	float eyeZ = 0.9f;
+	glm::mat4 camera = glm::lookAt(glm::vec3(eyeX, eyeY, eyeZ), glm::vec3(eyeX, eyeY, -50.f), glm::vec3(0.f, 1.f, 0.f));
 	GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
 	if (cameraLoc < 0) {
 		std::cerr << "cameraLoc 찾지 못함" << std::endl;
@@ -60,7 +63,7 @@ void CMap::Initialize()
 void CMap::Update(float ElapsedTime)
 {
 	if (isInitialized) {
-		glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)w_width / (float)w_height, 0.1f, 100.f);
+		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)w_width / (float)w_height, 0.1f, 100.f);
 		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
 		if (projLoc < 0) {
 			std::cerr << "projLoc 찾지 못함" << std::endl;
@@ -89,10 +92,10 @@ void CMap::Render()
 			std::cerr << "idxLoc 찾지 못함" << std::endl;
 		}
 
-		constexpr int MAX_Layer = 10;
+		constexpr int MAX_Layer = 30;
 
 		for (int i = 0; i < MAX_Layer; ++i) {
-			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -2.f * i));
+			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -1.f * i));
 			glUniform1f(idxLoc, (float)i);
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_QUADS, 0, 64);
@@ -115,90 +118,91 @@ GLuint CMap::InitBuffer()
 	// y -2.f ~ 2.f
 	// x -2.f ~ 2.f
 	// z -0.5f, 0.5f
+	float zSize = 0.5f;
 	float vertexRects[]{	// 위 왼 아 오	// 반시계
 		// 위쪽 네개 사각형
-		-2.f, 2.f, 1.f,
-		-2.f, 2.f, -1.f,
-		-1.f, 2.f, -1.f,
-		-1.f, 2.f, 1.f,
+		-2.f, 2.f, zSize,
+		-2.f, 2.f, -zSize,
+		-1.f, 2.f, -zSize,
+		-1.f, 2.f, zSize,
 
-		-1.f, 2.f, 1.f,
-		-1.f, 2.f, -1.f,
-		0.f, 2.f, -1.f,
-		0.f, 2.f, 1.f,
+		-1.f, 2.f, zSize,
+		-1.f, 2.f, -zSize,
+		0.f, 2.f, -zSize,
+		0.f, 2.f, zSize,
 
-		0.f, 2.f, 1.f,
-		0.f, 2.f, -1.f,
-		1.f, 2.f, -1.f,
-		1.f, 2.f, 1.f,
+		0.f, 2.f, zSize,
+		0.f, 2.f, -zSize,
+		1.f, 2.f, -zSize,
+		1.f, 2.f, zSize,
 
-		1.f, 2.f, 1.f,
-		1.f, 2.f, -1.f,
-		2.f, 2.f, -1.f,
-		2.f, 2.f, 1.f,
+		1.f, 2.f, zSize,
+		1.f, 2.f, -zSize,
+		2.f, 2.f, -zSize,
+		2.f, 2.f, zSize,
 
 		// 왼쪽 네개 사각형
-		-2.f, 2.f, 1.f,
-		-2.f, 1.f, 1.f,
-		-2.f, 1.f, -1.f,
-		-2.f, 2.f, -1.f,
+		-2.f, 2.f, zSize,
+		-2.f, 1.f, zSize,
+		-2.f, 1.f, -zSize,
+		-2.f, 2.f, -zSize,
 
-		-2.f, 1.f, 1.f,
-		-2.f, 0.f, 1.f,
-		-2.f, 0.f, -1.f,
-		-2.f, 1.f, -1.f,
+		-2.f, 1.f, zSize,
+		-2.f, 0.f, zSize,
+		-2.f, 0.f, -zSize,
+		-2.f, 1.f, -zSize,
 
-		-2.f, 0.f, 1.f,
-		-2.f, -1.f, 1.f,
-		-2.f, -1.f, -1.f,
-		-2.f, 0.f, -1.f,
+		-2.f, 0.f, zSize,
+		-2.f, -1.f, zSize,
+		-2.f, -1.f, -zSize,
+		-2.f, 0.f, -zSize,
 
-		-2.f, -1.f, 1.f,
-		-2.f, -2.f, 1.f,
-		-2.f, -2.f, -1.f,
-		-2.f, -1.f, -1.f,
+		-2.f, -1.f, zSize,
+		-2.f, -2.f, zSize,
+		-2.f, -2.f, -zSize,
+		-2.f, -1.f, -zSize,
 
 		// 아래쪽 네개 사각형
-		-2.f, -2.f, -1.f,
-		-2.f, -2.f, 1.f,
-		-1.f, -2.f, 1.f,
-		-1.f, -2.f, -1.f,
+		-2.f, -2.f, -zSize,
+		-2.f, -2.f, zSize,
+		-1.f, -2.f, zSize,
+		-1.f, -2.f, -zSize,
 
-		-1.f, -2.f, -1.f,
-		-1.f, -2.f, 1.f,
-		0.f, -2.f, 1.f,
-		0.f, -2.f, -1.f,
+		-1.f, -2.f, -zSize,
+		-1.f, -2.f, zSize,
+		0.f, -2.f, zSize,
+		0.f, -2.f, -zSize,
 
-		0.f, -2.f, -1.f,
-		0.f, -2.f, 1.f,
-		1.f, -2.f, 1.f,
-		1.f, -2.f, -1.f,
+		0.f, -2.f, -zSize,
+		0.f, -2.f, zSize,
+		1.f, -2.f, zSize,
+		1.f, -2.f, -zSize,
 
-		1.f, -2.f, -1.f,
-		1.f, -2.f, 1.f,
-		2.f, -2.f, 1.f,
-		2.f, -2.f, -1.f,
+		1.f, -2.f, -zSize,
+		1.f, -2.f, zSize,
+		2.f, -2.f, zSize,
+		2.f, -2.f, -zSize,
 
 		// 오른쪽 네개 사각형
-		2.f, 2.f, -1.f,
-		2.f, 1.f, -1.f,
-		2.f, 1.f, 1.f,
-		2.f, 2.f, 1.f,
+		2.f, 2.f, -zSize,
+		2.f, 1.f, -zSize,
+		2.f, 1.f, zSize,
+		2.f, 2.f, zSize,
 
-		2.f, 1.f, -1.f,
-		2.f, 0.f, -1.f,
-		2.f, 0.f, 1.f,
-		2.f, 1.f, 1.f,
+		2.f, 1.f, -zSize,
+		2.f, 0.f, -zSize,
+		2.f, 0.f, zSize,
+		2.f, 1.f, zSize,
 
-		2.f, 0.f, -1.f,
-		2.f, -1.f, -1.f,
-		2.f, -1.f, 1.f,
-		2.f, 0.f, 1.f,
+		2.f, 0.f, -zSize,
+		2.f, -1.f, -zSize,
+		2.f, -1.f, zSize,
+		2.f, 0.f, zSize,
 
-		2.f, -1.f, -1.f,
-		2.f, -2.f, -1.f,
-		2.f, -2.f, 1.f,
-		2.f, -1.f, 1.f
+		2.f, -1.f, -zSize,
+		2.f, -2.f, -zSize,
+		2.f, -2.f, zSize,
+		2.f, -1.f, zSize
 
 	};
 
