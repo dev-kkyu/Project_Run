@@ -9,6 +9,8 @@ private:
 	int& w_height;
 	std::vector<glm::imat4> map_data;
 
+	float move_z;
+
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);
 	virtual ~CMap();

@@ -58,10 +58,13 @@ void CMap::Initialize()
 	}
 	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
+	move_z = 0.f;
+
 }
 
 void CMap::Update(float ElapsedTime)
 {
+	// 초당 5개
 	if (isInitialized) {
 		glm::mat4 projection = glm::perspective(glm::radians(90.f), (float)w_width / (float)w_height, 0.1f, 100.f);
 		GLint projLoc = glGetUniformLocation(m_shader, "projMat");
@@ -69,7 +72,13 @@ void CMap::Update(float ElapsedTime)
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		//move_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, move_z));
 	}
+
+	move_z += 3.5f * ElapsedTime;
+	if (move_z > 1.f)
+		move_z -= 1.f;
 }
 
 void CMap::FixedUpdate()
@@ -87,13 +96,18 @@ void CMap::Render()
 		if (modelLoc < 0) {
 			std::cerr << "modelLoc 찾지 못함" << std::endl;
 		}
-		GLint idxLoc = glGetUniformLocation(m_shader, "idx");
+		GLint idxLoc = glGetUniformLocation(m_shader, "Index");
 		if (idxLoc < 0) {
 			std::cerr << "idxLoc 찾지 못함" << std::endl;
 		}
+		GLint zLoc = glGetUniformLocation(m_shader, "move_z");
+		if (zLoc < 0) {
+			std::cerr << "zLoc 찾지 못함" << std::endl;
+		}
+
+		glUniform1f(zLoc, move_z);
 
 		constexpr int MAX_Layer = 30;
-
 		for (int i = 0; i < MAX_Layer; ++i) {
 			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -1.f * i));
 			glUniform1f(idxLoc, (float)i);
