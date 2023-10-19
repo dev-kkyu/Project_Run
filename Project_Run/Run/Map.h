@@ -19,6 +19,13 @@ private:
 	bool isLeft;
 	bool isRight;
 	float move_x;
+	float acc_x;
+
+	float move_y;
+	bool isBottom;
+	bool isDrop;
+	float basic_v;
+	float velocity;
 
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);

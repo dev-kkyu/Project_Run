@@ -55,6 +55,13 @@ void CMap::Initialize()
 
 	isLeft = isRight = false;
 	move_x = 0.f;
+	acc_x = 0.f;
+
+	isBottom = true;
+	isDrop = false;
+	move_y = 0.f;
+	basic_v = 100.f;
+	velocity = basic_v;
 
 	m_pplayer = std::make_unique<CPlayer>();
 }
@@ -71,8 +78,44 @@ void CMap::Update(float ElapsedTime)
 			++map_index;		// map_index의 의미. 현재 0번위치의 사각형부터 map_data[map_index]의 지형을 본다.
 		}
 
-		if (isLeft or isRight) {
-			move_x += (-isLeft + isRight) * 3.f * ElapsedTime;
+		// 방향키
+		if (isLeft or isRight)
+			acc_x = float(-(int)isLeft + (int)isRight);
+		else if (acc_x != 0.f) {
+			if (acc_x > 0)
+				acc_x -= ElapsedTime * 5.f;
+			else
+				acc_x += ElapsedTime * 5.f;
+			if (abs(acc_x) < 0.2f)
+				acc_x = 0.f;
+		}
+		move_x += acc_x * 3.f * ElapsedTime;
+		if (move_x >= 1.75f)
+			move_x = 1.75f;
+		else if (move_x <= -1.75f)
+			move_x = -1.75f;
+
+
+		// 중력
+		if (isBottom and isOffTile()) {
+			isBottom = false;
+			isDrop = true;
+			velocity = -1.f;
+		}
+
+		if (not isBottom) {
+			move_y += pow(velocity, 2) * 9.8f / 1800000.f * (velocity < 0 ? -1.f : 1.f);
+			if (move_y <= 0.f and isOffTile())
+				isDrop = true;
+			if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
+				move_y = 0.f;
+				isBottom = true;
+				isDrop = false;
+				velocity = basic_v;
+			}
+			else {
+				velocity -= 250 * ElapsedTime;
+			}
 		}
 
 		GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
@@ -84,10 +127,7 @@ void CMap::Update(float ElapsedTime)
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
 
-		if (isOffTile())
-			std::cout << "Off" << clock() << std::endl;
-
-		glm::vec3 eye(move_x, -0.9f, 0.9f);
+		glm::vec3 eye(move_x, -0.9f + move_y, 0.9f);
 		glm::mat4 camera = glm::lookAt(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(eye.x, eye.y, -50.f), glm::vec3(0.f, 1.f, 0.f));
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
 
@@ -99,6 +139,7 @@ void CMap::Update(float ElapsedTime)
 			m_pplayer->SetCamera(camera);
 			m_pplayer->SetProjection(projection);
 			m_pplayer->SetMoveX(move_x);
+			m_pplayer->SetMoveY(move_y);
 			m_pplayer->Update(ElapsedTime);
 		}
 	}
@@ -283,8 +324,9 @@ void CMap::KeyboardEvent(int state, unsigned char key)
 	switch (state) {
 	case GLUT_DOWN:
 		switch (key) {
-		case 32:
-			std::cout << (int)key << " space" << std::endl;
+		case ' ':
+			if (isBottom)
+				isBottom = false;
 			break;
 		}
 		break;

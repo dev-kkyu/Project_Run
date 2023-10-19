@@ -26,6 +26,7 @@ void CPlayer::Initialize()
 	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
 
 	move_x = 0.f;
+	move_y = 0.f;
 }
 
 void CPlayer::Update(float ElapsedTime)
@@ -45,7 +46,7 @@ void CPlayer::Update(float ElapsedTime)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projMat));
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(0.25f, 0.25f, 1.f));
-		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(move_x, -1.75f, -1.f)) * scale;
+		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(move_x, -1.75f + move_y, -1.f)) * scale;
 	}
 }
 
@@ -116,4 +117,9 @@ GLuint CPlayer::InitBuffer()
 void CPlayer::SetMoveX(float move_x)
 {
 	this->move_x = move_x;
+}
+
+void CPlayer::SetMoveY(float move_y)
+{
+	this->move_y = move_y;
 }

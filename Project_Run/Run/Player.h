@@ -9,6 +9,7 @@ private:
 	glm::mat4 modelMat;
 
 	float move_x;
+	float move_y;
 
 public:
 	CPlayer();
@@ -26,5 +27,6 @@ public:
 	GLuint InitBuffer();
 
 	void SetMoveX(float move_x);
+	void SetMoveY(float move_y);
 };
 
