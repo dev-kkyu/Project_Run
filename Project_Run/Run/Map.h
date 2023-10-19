@@ -16,6 +16,10 @@ private:
 
 	std::unique_ptr<CPlayer> m_pplayer;
 
+	bool isLeft;
+	bool isRight;
+	float move_x;
+
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);
 	virtual ~CMap();
@@ -27,5 +31,8 @@ public:
 	virtual void Release() override;					//소멸될 때 할 일
 
 	GLuint InitBuffer();
+
+	void KeyboardEvent(int state, unsigned char key);
+	void SpecialKeyEvent(int state, int key);
 };
 

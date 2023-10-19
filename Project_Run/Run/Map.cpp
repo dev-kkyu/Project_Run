@@ -63,6 +63,9 @@ void CMap::Initialize()
 	move_z = 0.f;
 	map_index = -10;
 
+	isLeft = isRight = false;
+	move_x = 0.f;
+
 	m_pplayer = std::make_unique<CPlayer>(camera);
 }
 
@@ -78,16 +81,24 @@ void CMap::Update(float ElapsedTime)
 		}
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+
+		move_z += 3.5f * ElapsedTime;
+		if (move_z > 1.f) {
+			move_z -= 1.f;
+			++map_index;
+		}
+
+		if (isLeft or isRight) {
+			move_x += (-isLeft + isRight) * 1.5f * ElapsedTime;
+			if (m_pplayer)
+				m_pplayer->SetMoveX(move_x);
+		}
+
+
 		if (m_pplayer) {
 			m_pplayer->SetProjection(projection);
 			m_pplayer->Update(ElapsedTime);
 		}
-	}
-
-	move_z += 3.5f * ElapsedTime;
-	if (move_z > 1.f) {
-		move_z -= 1.f;
-		++map_index;
 	}
 }
 
@@ -263,4 +274,45 @@ GLuint CMap::InitBuffer()
 	glEnableVertexAttribArray(AttribPosLoc);										// Attribute È°¼ºÈ­
 
 	return VAO;
+}
+
+void CMap::KeyboardEvent(int state, unsigned char key)
+{
+	switch (state) {
+	case GLUT_DOWN:
+		switch (key) {
+		case 32:
+			std::cout << (int)key << " space" << std::endl;
+			break;
+		}
+		break;
+	case GLUT_UP:
+		break;
+	}
+}
+
+void CMap::SpecialKeyEvent(int state, int key)
+{
+	switch (state) {
+	case GLUT_DOWN:
+		switch (key) {
+		case GLUT_KEY_LEFT:
+			isLeft = true;
+			break;
+		case GLUT_KEY_RIGHT:
+			isRight = true;
+			break;
+		}
+		break;
+	case GLUT_UP:
+		switch (key) {
+		case GLUT_KEY_LEFT:
+			isLeft = false;
+			break;
+		case GLUT_KEY_RIGHT:
+			isRight = false;
+			break;
+		}
+		break;
+	}
 }

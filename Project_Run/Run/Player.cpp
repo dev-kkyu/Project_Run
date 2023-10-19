@@ -25,6 +25,8 @@ void CPlayer::Initialize()
 		std::cerr << "cameraLoc 찾지 못함" << std::endl;
 	}
 	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
+
+	move_x = 0.f;
 }
 
 void CPlayer::Update(float ElapsedTime)
@@ -38,7 +40,7 @@ void CPlayer::Update(float ElapsedTime)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projMat));
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(0.25f, 0.25f, 1.f));
-		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(0.f, -1.75f, -1.f)) * scale;
+		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(move_x, -1.75f, -1.f)) * scale;
 	}
 }
 
@@ -104,4 +106,9 @@ GLuint CPlayer::InitBuffer()
 	glEnableVertexAttribArray(AttribPosLoc);										// Attribute 활성화
 
 	return VAO;
+}
+
+void CPlayer::SetMoveX(float move_x)
+{
+	this->move_x = move_x;
 }

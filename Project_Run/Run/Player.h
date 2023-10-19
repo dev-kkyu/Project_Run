@@ -8,6 +8,7 @@ private:
 	glm::mat4 projMat;
 	glm::mat4 modelMat;
 
+	float move_x;
 
 public:
 	CPlayer(glm::mat4 cameraMat);
@@ -23,5 +24,7 @@ public:
 	void SetProjection(glm::mat4 projMat);
 
 	GLuint InitBuffer();
+
+	void SetMoveX(float move_x);
 };
 

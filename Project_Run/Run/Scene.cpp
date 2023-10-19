@@ -67,8 +67,12 @@ void CScene::MouseEvent(int button, int state, int x, int y)
 
 void CScene::KeyboardEvent(int state, unsigned char key)
 {
+	if (m_map)
+		m_map->KeyboardEvent(state, key);
 }
 
 void CScene::SpecialKeyEvent(int state, int key)
 {
+	if (m_map)
+		m_map->SpecialKeyEvent(state, key);
 }
