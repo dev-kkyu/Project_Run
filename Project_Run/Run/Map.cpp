@@ -104,7 +104,7 @@ void CMap::Update(float ElapsedTime)
 		}
 
 		if (not isBottom) {
-			move_y += pow(velocity, 2) * 9.8f / 1800000.f * (velocity < 0 ? -1.f : 1.f);
+			move_y += pow(velocity, 2) * 9.8f / 12000.f * ElapsedTime * (velocity < 0 ? -1.f : 1.f);
 			if (move_y <= 0.f and isOffTile())
 				isDrop = true;
 			if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
