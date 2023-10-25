@@ -8,6 +8,9 @@ private:
 	glm::mat4 projMat;
 	glm::mat4 modelMat;
 
+	GLuint Textures[4];
+	int TexFrame;
+
 	float move_x;
 	float move_y;
 
