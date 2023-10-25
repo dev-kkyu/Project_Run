@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 
+const int CMap::MAX_Layer = 30;
 CMap::CMap(std::string filename, int& winWidth, int& winHeight) : w_width{ winWidth }, w_height{ winHeight }
 {
 	std::ifstream in{ filename };
@@ -64,6 +65,8 @@ void CMap::Initialize()
 	velocity = basic_v;
 
 	m_pplayer = std::make_unique<CPlayer>();
+
+	stop_time = 0.f;
 }
 
 void CMap::Update(float ElapsedTime)
@@ -72,49 +75,63 @@ void CMap::Update(float ElapsedTime)
 	if (isInitialized) {
 		glUseProgram(m_shader);
 
-		move_z += 3.5f * ElapsedTime;
-		if (move_z > 1.f) {
-			move_z -= 1.f;
-			++map_index;		// map_index의 의미. 현재 0번위치의 사각형부터 map_data[map_index]의 지형을 본다.
-		}
-
-		// 방향키
-		if (isLeft or isRight)
-			acc_x = float(-(int)isLeft + (int)isRight);
-		else if (acc_x != 0.f) {
-			if (acc_x > 0)
-				acc_x -= ElapsedTime * 5.f;
-			else
-				acc_x += ElapsedTime * 5.f;
-			if (abs(acc_x) < 0.2f)
-				acc_x = 0.f;
-		}
-		move_x += acc_x * 3.f * ElapsedTime;
-		if (move_x >= 1.75f)
-			move_x = 1.75f;
-		else if (move_x <= -1.75f)
-			move_x = -1.75f;
-
-
-		// 중력
-		if (isBottom and isOffTile()) {
-			isBottom = false;
-			isDrop = true;
-			velocity = -1.f;
-		}
-
-		if (not isBottom) {
-			move_y += pow(velocity, 2) * 9.8f / 12000.f * ElapsedTime * (velocity < 0 ? -1.f : 1.f);
-			if (move_y <= 0.f and isOffTile())
-				isDrop = true;
-			if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
-				move_y = 0.f;
+		if (stop_time > 0.f) {
+			stop_time -= 1.f * ElapsedTime;
+			if (stop_time <= 0.f) {
 				isBottom = true;
-				isDrop = false;
-				velocity = basic_v;
+				stop_time = 0.f;
 			}
-			else {
-				velocity -= 250 * ElapsedTime;
+		}
+		else {
+			move_z += 3.5f * ElapsedTime;
+			if (move_z > 1.f) {
+				move_z -= 1.f;
+				++map_index;		// map_index의 의미. 현재 0번위치의 사각형부터 map_data[map_index]의 지형을 본다.
+			}
+
+			// 방향키
+			if (isLeft or isRight)
+				acc_x = float(-(int)isLeft + (int)isRight);
+			else if (acc_x != 0.f) {
+				if (acc_x > 0)
+					acc_x -= ElapsedTime * 5.f;
+				else
+					acc_x += ElapsedTime * 5.f;
+				if (abs(acc_x) < 0.2f)
+					acc_x = 0.f;
+			}
+			move_x += acc_x * 3.f * ElapsedTime;
+			// 벽 제한
+			if (move_x >= 1.75f)
+				move_x = 1.75f;
+			else if (move_x <= -1.75f)
+				move_x = -1.75f;
+
+
+			// 중력
+			if (isBottom and isOffTile()) {
+				isBottom = false;
+				isDrop = true;
+				velocity = -1.f;
+			}
+
+			if (not isBottom) {
+				move_y += pow(velocity, 2) * 9.8f / 12000.f * ElapsedTime * (velocity < 0 ? -1.f : 1.f);
+				if (move_y <= 0.f and isOffTile())
+					isDrop = true;
+				if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
+					if (move_y <= -0.5f) {
+						MoveBackOnTile();
+						stop_time = 3.f;
+					}
+					move_y = 0.f;
+					isBottom = true;
+					isDrop = false;
+					velocity = basic_v;
+				}
+				else {
+					velocity -= 250 * ElapsedTime;
+				}
 			}
 		}
 
@@ -127,6 +144,7 @@ void CMap::Update(float ElapsedTime)
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
 
+		// 최적의 카메라 찾기...
 		glm::vec3 eye(move_x, -0.9f + move_y, 0.9f);
 		glm::mat4 camera = glm::lookAt(glm::vec3(eye.x, eye.y, eye.z), glm::vec3(eye.x, eye.y, -50.f), glm::vec3(0.f, 1.f, 0.f));
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(camera));
@@ -175,7 +193,6 @@ void CMap::Render()
 
 		glUniform1f(zLoc, move_z);
 
-		constexpr int MAX_Layer = 30;
 		for (int i = 0; i < MAX_Layer; ++i) {
 			glm::mat4 alpha(0.f);
 			int index = map_index + i;
@@ -379,4 +396,22 @@ bool CMap::isOffTile()
 		}
 	}
 	return false;
+}
+
+void CMap::MoveBackOnTile()
+{
+	int bottom = 2;
+	int my_index;
+	int posIdx;
+	for (int i = 1;; ++i) {
+		posIdx = round(move_x + 1.5f);
+		my_index = map_index - i;
+		if (my_index + 1 < 0)
+			break;
+		if (map_data[my_index + 1][bottom][posIdx])
+			break;
+	}
+	map_index = my_index;
+	move_x = posIdx - 1.5f;
+	move_z = 0.f;
 }

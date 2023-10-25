@@ -7,6 +7,8 @@ class CPlayer;
 class CMap : public CGameObject
 {
 private:
+	static const int MAX_Layer;
+
 	int& w_width;
 	int& w_height;
 	std::vector<glm::mat4> map_data;
@@ -27,6 +29,8 @@ private:
 	float basic_v;
 	float velocity;
 
+	float stop_time;
+
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);
 	virtual ~CMap();
@@ -43,5 +47,6 @@ public:
 	void SpecialKeyEvent(int state, int key);
 
 	bool isOffTile();
+	void MoveBackOnTile();
 };
 
