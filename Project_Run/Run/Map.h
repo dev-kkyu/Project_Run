@@ -15,6 +15,7 @@ private:
 
 	float move_z;
 	int map_index;
+	int bottom_index;
 
 	std::unique_ptr<CPlayer> m_pplayer;
 
@@ -30,6 +31,13 @@ private:
 	float velocity;
 
 	float stop_time;
+
+	// 회전용 변수
+	bool is_rotating;
+	float now_angle;
+	int bef_bot_idx;
+	float bef_mv_x;
+	float bef_mv_y;
 
 public:
 	CMap(std::string filename, int& winWidth, int& winHeight);
@@ -48,5 +56,8 @@ public:
 
 	bool isOffTile();
 	void MoveBackOnTile();
+
+	void SetRotate();
+	void RotateMap(float ElapsedTime);
 };
 

@@ -53,6 +53,7 @@ void CMap::Initialize()
 
 	move_z = 0.f;
 	map_index = -10;
+	bottom_index = 2;
 
 	isLeft = isRight = false;
 	move_x = 0.f;
@@ -67,6 +68,13 @@ void CMap::Initialize()
 	m_pplayer = std::make_unique<CPlayer>();
 
 	stop_time = 0.f;
+
+	// 회전용 변수
+	is_rotating = false;
+	now_angle = 0.f;
+	bef_bot_idx = bottom_index;
+	bef_mv_x = move_x;
+	bef_mv_y = move_y;
 }
 
 void CMap::Update(float ElapsedTime)
@@ -75,7 +83,9 @@ void CMap::Update(float ElapsedTime)
 	if (isInitialized) {
 		glUseProgram(m_shader);
 
-		if (stop_time > 0.f) {
+		if (is_rotating)
+			RotateMap(ElapsedTime);
+		else if (stop_time > 0.f) {
 			stop_time -= 1.f * ElapsedTime;
 			if (stop_time <= 0.f) {
 				isBottom = true;
@@ -102,10 +112,12 @@ void CMap::Update(float ElapsedTime)
 			}
 			move_x += acc_x * 3.f * ElapsedTime;
 			// 벽 제한
-			if (move_x >= 1.75f)
-				move_x = 1.75f;
-			else if (move_x <= -1.75f)
-				move_x = -1.75f;
+			if (move_x >= 1.75f or move_x <= -1.75f) {
+				move_x = move_x >= 1.75f ? 1.75f : -1.75f;
+				SetRotate();
+				RotateMap(ElapsedTime);
+				return ;
+			}
 
 
 			// 중력
@@ -122,7 +134,7 @@ void CMap::Update(float ElapsedTime)
 				if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
 					if (move_y <= -0.5f) {
 						MoveBackOnTile();
-						stop_time = 3.f;
+						stop_time = 2.f;
 					}
 					move_y = 0.f;
 					isBottom = true;
@@ -193,6 +205,8 @@ void CMap::Render()
 
 		glUniform1f(zLoc, move_z);
 
+		float angle = 180.f - (bottom_index * 90.f);
+		glm::mat4 rotateMat = glm::rotate(glm::mat4(1.f), glm::radians(angle + now_angle), glm::vec3(0.f, 0.f, 1.f));
 		for (int i = 0; i < MAX_Layer; ++i) {
 			glm::mat4 alpha(0.f);
 			int index = map_index + i;
@@ -208,7 +222,7 @@ void CMap::Render()
 			}
 			glUniformMatrix4fv(alphaLoc, 1, GL_FALSE, glm::value_ptr(alpha));
 
-			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -1.f * i));
+			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, -1.f * i)) * rotateMat;
 			glUniform1f(idxLoc, (float)i);
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_QUADS, 0, 64);
@@ -380,18 +394,16 @@ void CMap::SpecialKeyEvent(int state, int key)
 
 bool CMap::isOffTile()
 {
-	int bottom = 2;
-
 	int posIdx = round(move_x + 1.5f);
 	if (map_index >= -2 and map_index < 99) {
 		if (move_z <= 0.5f and map_index >= -1) {
 			int lineIdx = map_index + 1;
-			if (not map_data[lineIdx][bottom][posIdx])
+			if (not map_data[lineIdx][bottom_index][posIdx])
 				return true;
 		}
-		else if (move_z > 0.5f and map_index < 98){
+		else if (move_z > 0.5f and map_index < 98) {
 			int lineIdx = map_index + 2;
-			if (not map_data[lineIdx][bottom][posIdx])
+			if (not map_data[lineIdx][bottom_index][posIdx])
 				return true;
 		}
 	}
@@ -400,7 +412,6 @@ bool CMap::isOffTile()
 
 void CMap::MoveBackOnTile()
 {
-	int bottom = 2;
 	int my_index;
 	int posIdx;
 	for (int i = 1;; ++i) {
@@ -408,10 +419,57 @@ void CMap::MoveBackOnTile()
 		my_index = map_index - i;
 		if (my_index + 1 < 0)
 			break;
-		if (map_data[my_index + 1][bottom][posIdx])
+		if (map_data[my_index + 1][bottom_index][posIdx])
 			break;
 	}
 	map_index = my_index;
 	move_x = posIdx - 1.5f;
 	move_z = 0.f;
+}
+
+void CMap::RotateMap(float ElapsedTime)
+{
+	static const float time_sec = 0.75f;
+	if (bef_mv_x == -1.75f) {
+		float finalx = 1.75f - bef_mv_y;
+		now_angle += 90.f / time_sec * ElapsedTime;
+		move_y -= bef_mv_y / time_sec * ElapsedTime;
+		move_x += (finalx - bef_mv_x) / time_sec * ElapsedTime;
+		if (now_angle >= 90.f) {
+			is_rotating = false;
+			bottom_index -= 1;
+			now_angle = 0.f;
+			move_y = 0.f;
+			if (move_x >= 1.75)
+				move_x = 1.7499;
+			if (bottom_index == -1)
+				bottom_index = 3;
+		}
+	}
+	else if (bef_mv_x == 1.75f) {
+		float finalx = -1.75f + bef_mv_y;
+		now_angle -= 90.f / time_sec * ElapsedTime;
+		move_y -= bef_mv_y / time_sec * ElapsedTime;
+		move_x -= (bef_mv_x - finalx) / time_sec * ElapsedTime;
+		if (now_angle <= -90.f) {
+			is_rotating = false;
+			bottom_index += 1;
+			now_angle = 0.f;
+			move_y = 0.f;
+			if (move_x <= -1.75)
+				move_x = -1.7499;
+			if (bottom_index == 4)
+				bottom_index = 0;
+		}
+	}
+	//is_rotating = false;
+}
+
+void CMap::SetRotate()
+{
+	is_rotating = true;
+	now_angle = 0.f;
+	bef_bot_idx = bottom_index;
+	bef_mv_x = move_x;
+	bef_mv_y = move_y;
 }
