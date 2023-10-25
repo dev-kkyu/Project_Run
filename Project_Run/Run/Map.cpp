@@ -114,9 +114,10 @@ void CMap::Update(float ElapsedTime)
 			// º® Á¦ÇÑ
 			if (move_x >= 1.75f or move_x <= -1.75f) {
 				move_x = move_x >= 1.75f ? 1.75f : -1.75f;
-				SetRotate();
-				RotateMap(ElapsedTime);
-				return ;
+				if (not isDrop) {
+					SetRotate();
+					RotateMap(ElapsedTime);
+				}
 			}
 
 
@@ -134,7 +135,7 @@ void CMap::Update(float ElapsedTime)
 				if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
 					if (move_y <= -0.5f) {
 						MoveBackOnTile();
-						stop_time = 2.f;
+						stop_time = 0.5f;
 					}
 					move_y = 0.f;
 					isBottom = true;
@@ -429,7 +430,7 @@ void CMap::MoveBackOnTile()
 
 void CMap::RotateMap(float ElapsedTime)
 {
-	static const float time_sec = 0.75f;
+	static const float time_sec = 0.5f;
 	if (bef_mv_x == -1.75f) {
 		float finalx = 1.75f - bef_mv_y;
 		now_angle += 90.f / time_sec * ElapsedTime;
