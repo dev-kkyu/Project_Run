@@ -11,6 +11,8 @@ private:
 	GLuint Textures[4];
 	int TexFrame;
 
+	bool isWalk;
+
 	float move_x;
 	float move_y;
 
@@ -28,6 +30,8 @@ public:
 	void SetProjection(glm::mat4 projMat);
 
 	GLuint InitBuffer();
+
+	void SetWalk(bool isWalk);
 
 	void SetMoveX(float move_x);
 	void SetMoveY(float move_y);

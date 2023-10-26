@@ -90,6 +90,7 @@ void CMap::Update(float ElapsedTime)
 			if (stop_time <= 0.f) {
 				isBottom = true;
 				stop_time = 0.f;
+				m_pplayer->SetWalk(true);
 			}
 		}
 		else {
@@ -117,6 +118,7 @@ void CMap::Update(float ElapsedTime)
 				if (not isDrop) {
 					SetRotate();
 					RotateMap(ElapsedTime);
+					m_pplayer->SetWalk(false);
 				}
 			}
 
@@ -135,8 +137,11 @@ void CMap::Update(float ElapsedTime)
 				if (move_y <= -5.f or (not isDrop and move_y <= 0.f and not isOffTile())) {
 					if (move_y <= -0.5f) {
 						MoveBackOnTile();
+						m_pplayer->SetWalk(false);
 						stop_time = 0.5f;
 					}
+					else
+						m_pplayer->SetWalk(true);
 					move_y = 0.f;
 					isBottom = true;
 					isDrop = false;
@@ -357,8 +362,10 @@ void CMap::KeyboardEvent(int state, unsigned char key)
 	case GLUT_DOWN:
 		switch (key) {
 		case ' ':
-			if (isBottom)
+			if (isBottom) {
+				m_pplayer->SetWalk(false);
 				isBottom = false;
+			}
 			break;
 		}
 		break;
@@ -438,6 +445,7 @@ void CMap::RotateMap(float ElapsedTime)
 		move_x += (finalx - bef_mv_x) / time_sec * ElapsedTime;
 		if (now_angle >= 90.f) {
 			is_rotating = false;
+			m_pplayer->SetWalk(true);
 			bottom_index -= 1;
 			now_angle = 0.f;
 			move_y = 0.f;
@@ -454,6 +462,7 @@ void CMap::RotateMap(float ElapsedTime)
 		move_x -= (bef_mv_x - finalx) / time_sec * ElapsedTime;
 		if (now_angle <= -90.f) {
 			is_rotating = false;
+			m_pplayer->SetWalk(true);
 			bottom_index += 1;
 			now_angle = 0.f;
 			move_y = 0.f;

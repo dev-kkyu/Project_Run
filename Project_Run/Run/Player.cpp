@@ -21,13 +21,9 @@ void CPlayer::Initialize()
 	GLuint vao = InitBuffer();
 	SetVao(vao);
 
-	GLint cameraLoc = glGetUniformLocation(m_shader, "cameraMat");
-	if (cameraLoc < 0) {
-		std::cerr << "cameraLoc 찾지 못함" << std::endl;
-	}
-	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
-
 	TexFrame = 0;
+
+	isWalk = true;
 
 	move_x = 0.f;
 	move_y = 0.f;
@@ -45,15 +41,21 @@ void CPlayer::Update(float ElapsedTime)
 		if (projLoc < 0) {
 			std::cerr << "projLoc 찾지 못함" << std::endl;
 		}
+		GLint modelLoc = glGetUniformLocation(m_shader, "modelMat");
+		if (modelLoc < 0) {
+			std::cerr << "modelLoc 찾지 못함" << std::endl;
+		}
 
 		glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, glm::value_ptr(cameraMat));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projMat));
 
-		glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(0.25f, 0.25f, 1.f));
-		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(move_x, -1.75f + move_y, -1.f)) * scale;
+		glm::mat4 scale = glm::scale(glm::mat4(1.f), glm::vec3(0.3f, 0.3f, 1.f));
+		modelMat = glm::translate(glm::mat4(1.f), glm::vec3(move_x, -1.7f + move_y, -1.f)) * scale;
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
 
 		static float time_sec;
-		time_sec += 5.f * ElapsedTime;
+		if (isWalk)
+			time_sec += 12.5f * ElapsedTime;		// 초당 텍스쳐 몇장 지나갈건지
 		if (time_sec >= 6.f)
 			time_sec -= 6.f;
 		TexFrame = int(time_sec);
@@ -70,12 +72,6 @@ void CPlayer::Render()
 		glUseProgram(m_shader);
 		glBindVertexArray(m_vao);
 
-		GLint modelLoc = glGetUniformLocation(m_shader, "modelMat");
-		if (modelLoc < 0) {
-			std::cerr << "modelLoc 찾지 못함" << std::endl;
-		}
-
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMat));
 		if (TexFrame > 3)
 			glBindTexture(GL_TEXTURE_2D, Textures[6 - TexFrame]);
 		else
@@ -155,11 +151,17 @@ GLuint CPlayer::InitBuffer()
 		GLubyte* data = stbi_load(name.c_str(), &ImageWidth, &ImageHeight, &numberOfChannel, 0);
 		if (!data)
 			std::cerr << "image load Error" << std::endl;
-		glTexImage2D(GL_TEXTURE_2D, 0, 4, ImageWidth, ImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		int texLevel = numberOfChannel == 4 ? GL_RGBA : GL_RGB;
+		glTexImage2D(GL_TEXTURE_2D, 0, numberOfChannel, ImageWidth, ImageHeight, 0, texLevel, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);
 	}
 
 	return VAO;
+}
+
+void CPlayer::SetWalk(bool isWalk)
+{
+	this->isWalk = isWalk;
 }
 
 void CPlayer::SetMoveX(float move_x)
