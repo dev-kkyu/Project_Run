@@ -1,6 +1,5 @@
 #include "Player.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "OpenGL/stb_image.h"
+#include "Image.h"
 #include <iostream>
 
 CPlayer::CPlayer()
@@ -148,12 +147,12 @@ GLuint CPlayer::InitBuffer()
 		int ImageWidth, ImageHeight, numberOfChannel;
 		//stbi_set_flip_vertically_on_load(true); //--- 이미지가 거꾸로 읽힌다면 추가
 		std::string name = "./Resources/" + std::to_string(i + 1) + ".png";
-		GLubyte* data = stbi_load(name.c_str(), &ImageWidth, &ImageHeight, &numberOfChannel, 0);
+		GLubyte* data = CImage::LoadImg(name, &ImageWidth, &ImageHeight, &numberOfChannel, 0);
 		if (!data)
 			std::cerr << "image load Error" << std::endl;
 		int texLevel = numberOfChannel == 4 ? GL_RGBA : GL_RGB;
 		glTexImage2D(GL_TEXTURE_2D, 0, numberOfChannel, ImageWidth, ImageHeight, 0, texLevel, GL_UNSIGNED_BYTE, data);
-		stbi_image_free(data);
+		CImage::FreeImg(data);
 	}
 
 	return VAO;

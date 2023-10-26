@@ -132,6 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Run.cpp" />
@@ -145,6 +147,8 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\LobbyShader.frag" />
+    <None Include="Shader\LobbyShader.vert" />
     <None Include="Shader\PlayerShader.frag" />
     <None Include="Shader\MapShader.frag" />
     <None Include="Shader\MapShader.vert" />
@@ -152,6 +156,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="Lobby.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />

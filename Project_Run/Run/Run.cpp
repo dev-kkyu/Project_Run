@@ -6,7 +6,9 @@ Run 게임 모작
 #include "stdafx.h"
 #include "Timer.h"
 #include "Scene.h"
+#include "Lobby.h"
 #include <iostream>
+#include <memory>
 
 
 // 콜백함수
@@ -29,7 +31,8 @@ int winHeight = 768;
 
 CTimer g_gameTimer;
 
-CScene* g_pscene = nullptr;
+std::unique_ptr<CLobby> g_plobby;
+std::unique_ptr<CScene> g_pscene;
 
 void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정 
 {
@@ -57,8 +60,7 @@ void main(int argc, char** argv)								//--- 윈도우 출력하고 콜백함수 설정
 		std::cout << "GLEW 3.0 not supported\n";
 	}
 
-	// 씬을 생성한다.
-	g_pscene = new CScene{ winWidth, winHeight };
+	g_plobby = std::make_unique<CLobby>();
 
 	//	콜백함수 설정
 	glutDisplayFunc(Display);									// 출력 함수의 지정
@@ -102,6 +104,8 @@ GLvoid Display(GLvoid)
 
 	if (g_pscene)
 		g_pscene->Render();
+	else if (g_plobby)
+		g_plobby->Render();
 
 	glutSwapBuffers();											// 화면에 출력하기
 }
@@ -121,7 +125,12 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	switch (key) {
 	case 27:			// ESC Key
 		glutLeaveMainLoop();
-	default:
+		break;
+	case ' ':			// Space를 누르면 게임이 시작된다.
+		if (not g_pscene) {
+			g_pscene = std::make_unique<CScene>(winWidth, winHeight);
+			g_plobby.reset();
+		}
 		break;
 	}
 }
