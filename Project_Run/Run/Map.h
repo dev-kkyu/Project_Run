@@ -33,7 +33,7 @@ private:
 	float stop_time;
 
 	// 회전용 변수
-	bool is_rotating;
+	bool is_Rotating;
 	float now_angle;
 	float bef_mv_x;
 	float bef_mv_y;
