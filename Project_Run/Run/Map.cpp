@@ -72,7 +72,6 @@ void CMap::Initialize()
 	// 회전용 변수
 	is_rotating = false;
 	now_angle = 0.f;
-	bef_bot_idx = bottom_index;
 	bef_mv_x = move_x;
 	bef_mv_y = move_y;
 }
@@ -472,14 +471,12 @@ void CMap::RotateMap(float ElapsedTime)
 				bottom_index = 0;
 		}
 	}
-	//is_rotating = false;
 }
 
 void CMap::SetRotate()
 {
 	is_rotating = true;
 	now_angle = 0.f;
-	bef_bot_idx = bottom_index;
 	bef_mv_x = move_x;
 	bef_mv_y = move_y;
 }
